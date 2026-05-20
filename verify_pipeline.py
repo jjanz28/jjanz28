@@ -1,9 +1,6 @@
 import argparse
 from pathlib import Path
 
-import torch
-from diffusers import StableDiffusionPipeline
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -42,6 +39,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    import torch
+    from diffusers import StableDiffusionPipeline
     args = parse_args()
     if args.width % 8 != 0 or args.height % 8 != 0:
         raise ValueError("Width and height must be multiples of 8.")

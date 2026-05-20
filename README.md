@@ -65,8 +65,23 @@ Expected output files:
   - `python generate.py --prompt "test prompt" --output outputs/test.png`
 - Run smoke-test verification:
   - `python verify_pipeline.py --output outputs/pipeline_verify_smoke.png`
+- Run lint + tests:
+  - `ruff check .`
+  - `pytest`
 - Deactivate when done:
   - `deactivate`
+
+## Testing framework
+- Test runner: `pytest`
+- Linter: `ruff`
+- Test location: `tests/`
+- CI workflow: `.github/workflows/ci.yml`
+
+Install dev tooling:
+
+```bash
+pip install -r requirements-dev.txt
+```
 
 ## Smoke test results
 Latest smoke-test run status: **PASS**
