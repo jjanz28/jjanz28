@@ -81,6 +81,32 @@ Notes:
 - Dependency import smoke test passed (`torch`, `diffusers`, `transformers`, `accelerate`).
 - Non-blocking warnings were observed about `torchvision` fallback in `transformers`, but pipeline generation completed successfully.
 
+## Next phase development roadmap
+### Milestone 1: reliability and test coverage
+- Add automated smoke tests for both `generate.py` and `verify_pipeline.py`.
+- Add argument validation tests (resolution rules, step bounds, output path behavior).
+- Add CI checks for linting and test execution on push/PR.
+
+### Milestone 2: generation quality and controls
+- Add sampler/scheduler selection flags and default presets.
+- Add optional negative-prompt presets for common artifacts.
+- Add reproducibility docs for seed strategy and model/version pinning.
+
+### Milestone 3: performance and usability
+- Add device diagnostics output (`cuda` availability, dtype, memory hints).
+- Add optional low-memory mode and better CPU fallback messaging.
+- Add progress and runtime summary output for generation runs.
+
+### Milestone 4: packaging and deployment readiness
+- Add a `Makefile`/task runner for setup, test, and smoke-test commands.
+- Add containerized runtime option for reproducible environments.
+- Document release checklist (dependency lock refresh, smoke test, changelog).
+
+### Exit criteria for next phase
+- CI is green on `main`.
+- Smoke test artifacts can be generated consistently from a clean environment.
+- README reflects production-ready setup, usage, and troubleshooting paths.
+
 ## Troubleshooting
 - GitHub/Hugging Face rate limiting or model access issues:
   - Authenticate with Hugging Face CLI and accept model license terms if required.
