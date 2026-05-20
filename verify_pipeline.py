@@ -39,13 +39,14 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    import torch
-    from diffusers import StableDiffusionPipeline
     args = parse_args()
     if args.width % 8 != 0 or args.height % 8 != 0:
         raise ValueError("Width and height must be multiples of 8.")
     if args.steps < 1:
         raise ValueError("--steps must be >= 1.")
+
+    import torch
+    from diffusers import StableDiffusionPipeline
 
     use_cuda = torch.cuda.is_available() and not args.cpu
     device = "cuda" if use_cuda else "cpu"
