@@ -58,6 +58,16 @@ python generate.py \
   --output outputs/portrait.png
 ```
 
+Low-memory example:
+
+```bash
+python generate.py \
+  --prompt "detailed city skyline at dusk" \
+  --scheduler dpmpp_2m \
+  --low-memory \
+  --output outputs/city_low_mem.png
+```
+
 ## Main options
 - `--prompt` (required): generation prompt
 - `--negative-prompt`: optional exclusions
@@ -72,12 +82,20 @@ python generate.py \
 - `--seed`: deterministic seed (default `42`)
 - `--num-images`: number of images per run (default `1`)
 - `--cpu`: force CPU inference
+- `--low-memory`: enable memory-saving pipeline options when available
 
 ## Reproducibility guidance
 - Pin model identity with `--model` and `--model-revision`.
 - Set a fixed `--seed` to reproduce the same prompt run.
 - Keep `--scheduler`, `--steps`, resolution, and guidance scale constant across runs.
 - Save generated outputs with deterministic filenames per run configuration.
+
+## Runtime diagnostics and summary
+Each generation run now prints:
+- Device diagnostics (device, dtype, CUDA availability, and GPU memory hints on CUDA runs)
+- Effective run configuration (seed, scheduler, and model revision)
+- Progress marker before generation starts
+- Runtime summary with elapsed time, image count, resolution, scheduler, and low-memory status
 
 ## Development workflow
 - Activate environment:

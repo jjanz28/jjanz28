@@ -1,4 +1,5 @@
 import argparse
+import time
 from pathlib import Path
 
 NEGATIVE_PROMPT_PRESETS = {
@@ -73,6 +74,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Force CPU inference (slow).",
     )
+    parser.add_argument(
+        "--low-memory",
+        action="store_true",
+        help="Enable memory-saving pipeline options when available.",
+    )
     return parser.parse_args()
 
 
@@ -90,6 +96,30 @@ def configure_scheduler(pipe, scheduler_name: str, scheduler_map: dict) -> None:
         return
     scheduler_cls = scheduler_map[scheduler_name]
     pipe.scheduler = scheduler_cls.from_config(pipe.scheduler.config)
+
+
+def format_device_diagnostics(torch, device: str, dtype) -> str:
+    diagnostics = [
+        f"device={device}",
+        f"dtype={dtype}",
+        f"cuda_available={torch.cuda.is_available()}",
+    ]
+    if device == "cuda":
+        diagnostics.append(f"gpu={torch.cuda.get_device_name(0)}")
+        total_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        diagnostics.append(f"vram_gb={total_memory_gb:.1f}")
+    return "Diagnostics: " + ", ".join(diagnostics)
+
+
+def enable_low_memory_mode(pipe) -> list[str]:
+    applied = []
+    if hasattr(pipe, "enable_attention_slicing"):
+        pipe.enable_attention_slicing()
+        applied.append("attention_slicing")
+    if hasattr(pipe, "enable_vae_slicing"):
+        pipe.enable_vae_slicing()
+        applied.append("vae_slicing")
+    return applied
 
 
 def main() -> None:
@@ -128,6 +158,14 @@ def main() -> None:
     }
     configure_scheduler(pipe, args.scheduler, scheduler_map)
     negative_prompt = build_negative_prompt(args.negative_prompt, args.negative_preset)
+    print(format_device_diagnostics(torch, device, dtype))
+
+    if args.low_memory:
+        memory_features = enable_low_memory_mode(pipe)
+        if memory_features:
+            print(f"Low-memory mode enabled: {', '.join(memory_features)}")
+        else:
+            print("Low-memory mode requested, but no memory-saving features were available.")
 
     revision_label = args.model_revision or "default"
     print(
@@ -136,6 +174,8 @@ def main() -> None:
     )
 
     generator = torch.Generator(device=device).manual_seed(args.seed)
+    print("Generating images...")
+    start_time = time.perf_counter()
     result = pipe(
         prompt=args.prompt,
         negative_prompt=negative_prompt,
@@ -146,12 +186,18 @@ def main() -> None:
         num_images_per_prompt=args.num_images,
         generator=generator,
     )
+    elapsed_seconds = time.perf_counter() - start_time
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if args.num_images == 1:
         result.images[0].save(output_path)
         print(f"Saved image to: {output_path.resolve()}")
+        print(
+            f"Runtime summary: elapsed={elapsed_seconds:.2f}s, "
+            f"images={len(result.images)}, resolution={args.width}x{args.height}, "
+            f"scheduler={args.scheduler}, low_memory={args.low_memory}"
+        )
         return
 
     stem = output_path.stem
@@ -160,6 +206,12 @@ def main() -> None:
         numbered_path = output_path.with_name(f"{stem}_{idx:02d}{suffix}")
         image.save(numbered_path)
         print(f"Saved image to: {numbered_path.resolve()}")
+
+    print(
+        f"Runtime summary: elapsed={elapsed_seconds:.2f}s, "
+        f"images={len(result.images)}, resolution={args.width}x{args.height}, "
+        f"scheduler={args.scheduler}, low_memory={args.low_memory}"
+    )
 
 
 if __name__ == "__main__":
