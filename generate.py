@@ -1,6 +1,15 @@
 import argparse
 from pathlib import Path
 
+NEGATIVE_PROMPT_PRESETS = {
+    "none": None,
+    "photo": "blurry, low quality, artifacts, overexposed, underexposed, watermark, text",
+    "illustration": "blurry, muddy colors, bad anatomy, extra limbs, watermark, text",
+    "anime": "low quality, blurry, bad hands, malformed face, watermark, text",
+}
+
+SCHEDULER_CHOICES = ("default", "ddim", "euler", "euler_a", "dpmpp_2m")
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate an image with Stable Diffusion.")
@@ -11,9 +20,26 @@ def parse_args() -> argparse.Namespace:
         help="Optional negative prompt.",
     )
     parser.add_argument(
+        "--negative-preset",
+        choices=tuple(NEGATIVE_PROMPT_PRESETS.keys()),
+        default="none",
+        help="Optional negative prompt preset.",
+    )
+    parser.add_argument(
         "--model",
         default="runwayml/stable-diffusion-v1-5",
         help="Hugging Face model ID.",
+    )
+    parser.add_argument(
+        "--model-revision",
+        default=None,
+        help="Optional model revision/tag/commit to pin for reproducibility.",
+    )
+    parser.add_argument(
+        "--scheduler",
+        choices=SCHEDULER_CHOICES,
+        default="default",
+        help="Scheduler to use for inference.",
     )
     parser.add_argument("--output", default="output.png", help="Output image path.")
     parser.add_argument("--width", type=int, default=512, help="Output width.")
@@ -50,26 +76,68 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def build_negative_prompt(user_negative_prompt: str | None, preset_name: str) -> str | None:
+    preset_prompt = NEGATIVE_PROMPT_PRESETS[preset_name]
+    if user_negative_prompt and preset_prompt:
+        return f"{user_negative_prompt}, {preset_prompt}"
+    if user_negative_prompt:
+        return user_negative_prompt
+    return preset_prompt
+
+
+def configure_scheduler(pipe, scheduler_name: str, scheduler_map: dict) -> None:
+    if scheduler_name == "default":
+        return
+    scheduler_cls = scheduler_map[scheduler_name]
+    pipe.scheduler = scheduler_cls.from_config(pipe.scheduler.config)
+
+
 def main() -> None:
     import torch
-    from diffusers import StableDiffusionPipeline
+    from diffusers import (
+        DDIMScheduler,
+        DPMSolverMultistepScheduler,
+        EulerAncestralDiscreteScheduler,
+        EulerDiscreteScheduler,
+        StableDiffusionPipeline,
+    )
+
     args = parse_args()
     if args.width % 8 != 0 or args.height % 8 != 0:
         raise ValueError("Width and height must be multiples of 8.")
     if args.num_images < 1:
         raise ValueError("--num-images must be >= 1.")
+
     use_cuda = torch.cuda.is_available() and not args.cpu
     device = "cuda" if use_cuda else "cpu"
     dtype = torch.float16 if use_cuda else torch.float32
     print(f"Loading model '{args.model}' on {device}...")
 
-    pipe = StableDiffusionPipeline.from_pretrained(args.model, torch_dtype=dtype)
+    pipe_kwargs = {"torch_dtype": dtype}
+    if args.model_revision:
+        pipe_kwargs["revision"] = args.model_revision
+    pipe = StableDiffusionPipeline.from_pretrained(args.model, **pipe_kwargs)
     pipe = pipe.to(device)
+
+    scheduler_map = {
+        "ddim": DDIMScheduler,
+        "euler": EulerDiscreteScheduler,
+        "euler_a": EulerAncestralDiscreteScheduler,
+        "dpmpp_2m": DPMSolverMultistepScheduler,
+    }
+    configure_scheduler(pipe, args.scheduler, scheduler_map)
+    negative_prompt = build_negative_prompt(args.negative_prompt, args.negative_preset)
+
+    revision_label = args.model_revision or "default"
+    print(
+        f"Run config: seed={args.seed}, scheduler={args.scheduler}, "
+        f"model={args.model}@{revision_label}"
+    )
 
     generator = torch.Generator(device=device).manual_seed(args.seed)
     result = pipe(
         prompt=args.prompt,
-        negative_prompt=args.negative_prompt,
+        negative_prompt=negative_prompt,
         width=args.width,
         height=args.height,
         num_inference_steps=args.steps,
