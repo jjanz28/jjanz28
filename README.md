@@ -46,10 +46,25 @@ Expected output files:
 - `outputs/city_03.png`
 - `outputs/city_04.png`
 
+Quality-control example:
+
+```bash
+python generate.py \
+  --prompt "portrait photo of a traveler in golden hour light" \
+  --negative-preset photo \
+  --scheduler euler_a \
+  --seed 1234 \
+  --model-revision main \
+  --output outputs/portrait.png
+```
+
 ## Main options
 - `--prompt` (required): generation prompt
 - `--negative-prompt`: optional exclusions
+- `--negative-preset`: preset exclusions (`none`, `photo`, `illustration`, `anime`)
 - `--model`: model ID (default `runwayml/stable-diffusion-v1-5`)
+- `--model-revision`: optional model tag/branch/commit pin for reproducibility
+- `--scheduler`: sampler scheduler (`default`, `ddim`, `euler`, `euler_a`, `dpmpp_2m`)
 - `--output`: output image path (default `output.png`)
 - `--width` and `--height`: image size (must be divisible by 8)
 - `--steps`: inference steps (default `30`)
@@ -57,6 +72,12 @@ Expected output files:
 - `--seed`: deterministic seed (default `42`)
 - `--num-images`: number of images per run (default `1`)
 - `--cpu`: force CPU inference
+
+## Reproducibility guidance
+- Pin model identity with `--model` and `--model-revision`.
+- Set a fixed `--seed` to reproduce the same prompt run.
+- Keep `--scheduler`, `--steps`, resolution, and guidance scale constant across runs.
+- Save generated outputs with deterministic filenames per run configuration.
 
 ## Development workflow
 - Activate environment:
