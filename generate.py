@@ -93,6 +93,13 @@ def configure_scheduler(pipe, scheduler_name: str, scheduler_map: dict) -> None:
 
 
 def main() -> None:
+
+    args = parse_args()
+    if args.width % 8 != 0 or args.height % 8 != 0:
+        raise ValueError("Width and height must be multiples of 8.")
+    if args.num_images < 1:
+        raise ValueError("--num-images must be >= 1.")
+
     import torch
     from diffusers import (
         DDIMScheduler,
@@ -101,12 +108,6 @@ def main() -> None:
         EulerDiscreteScheduler,
         StableDiffusionPipeline,
     )
-
-    args = parse_args()
-    if args.width % 8 != 0 or args.height % 8 != 0:
-        raise ValueError("Width and height must be multiples of 8.")
-    if args.num_images < 1:
-        raise ValueError("--num-images must be >= 1.")
 
     use_cuda = torch.cuda.is_available() and not args.cpu
     device = "cuda" if use_cuda else "cpu"
