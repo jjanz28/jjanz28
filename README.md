@@ -3,6 +3,7 @@ Starter project for text-to-image generation using Python, PyTorch, and Hugging 
 
 ## What this project includes
 - `generate.py`: command-line image generation script
+- `verify_pipeline.py`: smoke-test script for pipeline load + generation
 - `requirements.txt`: Python package dependencies
 - `outputs/`: generated image files (created automatically)
 
@@ -62,8 +63,23 @@ Expected output files:
   - `source .venv/bin/activate`
 - Run generation script while iterating:
   - `python generate.py --prompt "test prompt" --output outputs/test.png`
+- Run smoke-test verification:
+  - `python verify_pipeline.py --output outputs/pipeline_verify_smoke.png`
 - Deactivate when done:
   - `deactivate`
+
+## Smoke test results
+Latest smoke-test run status: **PASS**
+
+Command:
+- `/home/jay/stable-diffusion/.venv/bin/python /home/jay/stable-diffusion/verify_pipeline.py --output /home/jay/stable-diffusion/outputs/pipeline_verify_smoke.png`
+
+Result artifact:
+- `outputs/pipeline_verify_smoke.png` (generated successfully)
+
+Notes:
+- Dependency import smoke test passed (`torch`, `diffusers`, `transformers`, `accelerate`).
+- Non-blocking warnings were observed about `torchvision` fallback in `transformers`, but pipeline generation completed successfully.
 
 ## Troubleshooting
 - GitHub/Hugging Face rate limiting or model access issues:
