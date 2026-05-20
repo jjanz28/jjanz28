@@ -1,6 +1,9 @@
 import argparse
 import time
 from pathlib import Path
+from typing import Sequence
+
+from model_loader import create_generator, load_stable_diffusion_runtime
 
 NEGATIVE_PROMPT_PRESETS = {
     "none": None,
@@ -12,7 +15,21 @@ NEGATIVE_PROMPT_PRESETS = {
 SCHEDULER_CHOICES = ("default", "ddim", "euler", "euler_a", "dpmpp_2m")
 
 
-def parse_args() -> argparse.Namespace:
+def positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be >= 1")
+    return parsed
+
+
+def positive_float(value: str) -> float:
+    parsed = float(value)
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be > 0")
+    return parsed
+
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Generate an image with Stable Diffusion.")
     parser.add_argument("--prompt", required=True, help="Text prompt to generate.")
     parser.add_argument(
@@ -43,17 +60,17 @@ def parse_args() -> argparse.Namespace:
         help="Scheduler to use for inference.",
     )
     parser.add_argument("--output", default="output.png", help="Output image path.")
-    parser.add_argument("--width", type=int, default=512, help="Output width.")
-    parser.add_argument("--height", type=int, default=512, help="Output height.")
+    parser.add_argument("--width", type=positive_int, default=512, help="Output width.")
+    parser.add_argument("--height", type=positive_int, default=512, help="Output height.")
     parser.add_argument(
         "--steps",
-        type=int,
+        type=positive_int,
         default=30,
         help="Number of inference steps.",
     )
     parser.add_argument(
         "--guidance-scale",
-        type=float,
+        type=positive_float,
         default=7.5,
         help="Classifier-free guidance scale.",
     )
@@ -65,7 +82,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--num-images",
-        type=int,
+        type=positive_int,
         default=1,
         help="Number of images to generate.",
     )
@@ -79,7 +96,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable memory-saving pipeline options when available.",
     )
-    return parser.parse_args()
+    return parser
+
+
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    return build_parser().parse_args(argv)
 
 
 def build_negative_prompt(user_negative_prompt: str | None, preset_name: str) -> str | None:
@@ -90,12 +111,6 @@ def build_negative_prompt(user_negative_prompt: str | None, preset_name: str) ->
         return user_negative_prompt
     return preset_prompt
 
-
-def configure_scheduler(pipe, scheduler_name: str, scheduler_map: dict) -> None:
-    if scheduler_name == "default":
-        return
-    scheduler_cls = scheduler_map[scheduler_name]
-    pipe.scheduler = scheduler_cls.from_config(pipe.scheduler.config)
 
 
 def format_device_diagnostics(torch, device: str, dtype) -> str:
@@ -130,33 +145,17 @@ def main() -> None:
     if args.num_images < 1:
         raise ValueError("--num-images must be >= 1.")
 
-    import torch
-    from diffusers import (
-        DDIMScheduler,
-        DPMSolverMultistepScheduler,
-        EulerAncestralDiscreteScheduler,
-        EulerDiscreteScheduler,
-        StableDiffusionPipeline,
+    runtime = load_stable_diffusion_runtime(
+        model=args.model,
+        model_revision=args.model_revision,
+        force_cpu=args.cpu,
+        scheduler_name=args.scheduler,
     )
-
-    use_cuda = torch.cuda.is_available() and not args.cpu
-    device = "cuda" if use_cuda else "cpu"
-    dtype = torch.float16 if use_cuda else torch.float32
+    torch = runtime.torch
+    pipe = runtime.pipe
+    device = runtime.device
+    dtype = runtime.dtype
     print(f"Loading model '{args.model}' on {device}...")
-
-    pipe_kwargs = {"torch_dtype": dtype}
-    if args.model_revision:
-        pipe_kwargs["revision"] = args.model_revision
-    pipe = StableDiffusionPipeline.from_pretrained(args.model, **pipe_kwargs)
-    pipe = pipe.to(device)
-
-    scheduler_map = {
-        "ddim": DDIMScheduler,
-        "euler": EulerDiscreteScheduler,
-        "euler_a": EulerAncestralDiscreteScheduler,
-        "dpmpp_2m": DPMSolverMultistepScheduler,
-    }
-    configure_scheduler(pipe, args.scheduler, scheduler_map)
     negative_prompt = build_negative_prompt(args.negative_prompt, args.negative_preset)
     print(format_device_diagnostics(torch, device, dtype))
 
@@ -173,7 +172,7 @@ def main() -> None:
         f"model={args.model}@{revision_label}"
     )
 
-    generator = torch.Generator(device=device).manual_seed(args.seed)
+    generator = create_generator(torch, device=device, seed=args.seed)
     print("Generating images...")
     start_time = time.perf_counter()
     result = pipe(
