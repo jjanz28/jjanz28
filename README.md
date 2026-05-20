@@ -1,38 +1,48 @@
-# Stable Diffusion Project
-Starter project for text-to-image generation using Python, PyTorch, and Hugging Face Diffusers.
+# Stable Diffusion CLI Project
+Local text-to-image generation project built with Python, PyTorch, and Hugging Face Diffusers.
 
-## What this project includes
-- `generate.py`: command-line image generation script
-- `verify_pipeline.py`: smoke-test script for pipeline load + generation
-- `requirements.txt`: Python package dependencies
-- `outputs/`: generated image files (created automatically)
+## Project structure
+```text
+stable-diffusion/
+├── generate.py                # Main CLI for image generation
+├── model_loader.py            # Shared model/runtime loading helpers
+├── verify_pipeline.py         # Smoke test for pipeline load + generation
+├── gui_app.py                 # Desktop launcher UI that wraps the CLI
+├── requirements.txt           # Runtime dependencies
+├── requirements-dev.txt       # Lint/test dependencies
+├── pyproject.toml             # Tooling config (pytest + ruff)
+├── tests/                     # Unit tests
+├── outputs/                   # Generated images
+└── .github/workflows/ci.yml   # CI checks
+```
 
-## Prerequisites
-- Python 3.10 or newer
-- `pip`
-- Optional but recommended: CUDA-capable NVIDIA GPU
-
-## Development environment setup
-From the project root:
-
+## Setup instructions
+### 1) Create and activate a virtual environment
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
+
+### 2) Install dependencies
+```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Usage
-Basic generation:
+Optional dev tools:
+```bash
+pip install -r requirements-dev.txt
+```
 
+## CLI usage examples
+### Basic generation
 ```bash
 python generate.py \
-  --prompt "a cinematic photo of a robot walking through neon rain at night" \
+  --prompt "a cinematic photo of a robot in neon rain" \
   --output outputs/robot.png
 ```
 
-Generate multiple images:
-
+### Generate multiple images
 ```bash
 python generate.py \
   --prompt "isometric cyberpunk city block" \
@@ -40,14 +50,13 @@ python generate.py \
   --output outputs/city.png
 ```
 
-Expected output files:
+This creates:
 - `outputs/city_01.png`
 - `outputs/city_02.png`
 - `outputs/city_03.png`
 - `outputs/city_04.png`
 
-Quality-control example:
-
+### Use scheduler, preset, and reproducible seed
 ```bash
 python generate.py \
   --prompt "portrait photo of a traveler in golden hour light" \
@@ -58,95 +67,39 @@ python generate.py \
   --output outputs/portrait.png
 ```
 
-## Main options
-- `--prompt` (required): generation prompt
-- `--negative-prompt`: optional exclusions
-- `--negative-preset`: preset exclusions (`none`, `photo`, `illustration`, `anime`)
-- `--model`: model ID (default `runwayml/stable-diffusion-v1-5`)
-- `--model-revision`: optional model tag/branch/commit pin for reproducibility
-- `--scheduler`: sampler scheduler (`default`, `ddim`, `euler`, `euler_a`, `dpmpp_2m`)
-- `--output`: output image path (default `output.png`)
-- `--width` and `--height`: image size (must be divisible by 8)
-- `--steps`: inference steps (default `30`)
-- `--guidance-scale`: guidance strength (default `7.5`)
-- `--seed`: deterministic seed (default `42`)
-- `--num-images`: number of images per run (default `1`)
-- `--cpu`: force CPU inference
-
-## Reproducibility guidance
-- Pin model identity with `--model` and `--model-revision`.
-- Set a fixed `--seed` to reproduce the same prompt run.
-- Keep `--scheduler`, `--steps`, resolution, and guidance scale constant across runs.
-- Save generated outputs with deterministic filenames per run configuration.
-
-## Development workflow
-- Activate environment:
-  - `source .venv/bin/activate`
-- Run generation script while iterating:
-  - `python generate.py --prompt "test prompt" --output outputs/test.png`
-- Run smoke-test verification:
-  - `python verify_pipeline.py --output outputs/pipeline_verify_smoke.png`
-- Run lint + tests:
-  - `ruff check .`
-  - `pytest`
-- Deactivate when done:
-  - `deactivate`
-
-## Testing framework
-- Test runner: `pytest`
-- Linter: `ruff`
-- Test location: `tests/`
-- CI workflow: `.github/workflows/ci.yml`
-
-Install dev tooling:
-
+### Low-memory mode
 ```bash
-pip install -r requirements-dev.txt
+python generate.py \
+  --prompt "detailed skyline at dusk" \
+  --scheduler dpmpp_2m \
+  --low-memory \
+  --output outputs/city_low_mem.png
 ```
 
-## Smoke test results
-Latest smoke-test run status: **PASS**
+## Key CLI options
+- `--prompt` (required): text prompt
+- `--negative-prompt`: custom negative prompt
+- `--negative-preset`: `none`, `photo`, `illustration`, `anime`
+- `--model`: model ID (default: `runwayml/stable-diffusion-v1-5`)
+- `--model-revision`: model tag/branch/commit
+- `--scheduler`: `default`, `ddim`, `euler`, `euler_a`, `dpmpp_2m`
+- `--output`: output file path
+- `--width`, `--height`: image size (must be multiples of 8)
+- `--steps`: inference steps
+- `--guidance-scale`: classifier-free guidance strength
+- `--seed`: reproducible random seed
+- `--num-images`: images per prompt
+- `--cpu`: force CPU inference
+- `--low-memory`: enable memory-saving options when available
 
-Command:
-- `/home/jay/stable-diffusion/.venv/bin/python /home/jay/stable-diffusion/verify_pipeline.py --output /home/jay/stable-diffusion/outputs/pipeline_verify_smoke.png`
+## Verification and testing
+Run a quick smoke check:
+```bash
+python verify_pipeline.py --output outputs/pipeline_verify_smoke.png
+```
 
-Result artifact:
-- `outputs/pipeline_verify_smoke.png` (generated successfully)
-
-Notes:
-- Dependency import smoke test passed (`torch`, `diffusers`, `transformers`, `accelerate`).
-- Non-blocking warnings were observed about `torchvision` fallback in `transformers`, but pipeline generation completed successfully.
-
-## Next phase development roadmap
-### Milestone 1: reliability and test coverage
-- Add automated smoke tests for both `generate.py` and `verify_pipeline.py`.
-- Add argument validation tests (resolution rules, step bounds, output path behavior).
-- Add CI checks for linting and test execution on push/PR.
-
-### Milestone 2: generation quality and controls
-- Add sampler/scheduler selection flags and default presets.
-- Add optional negative-prompt presets for common artifacts.
-- Add reproducibility docs for seed strategy and model/version pinning.
-
-### Milestone 3: performance and usability
-- Add device diagnostics output (`cuda` availability, dtype, memory hints).
-- Add optional low-memory mode and better CPU fallback messaging.
-- Add progress and runtime summary output for generation runs.
-
-### Milestone 4: packaging and deployment readiness
-- Add a `Makefile`/task runner for setup, test, and smoke-test commands.
-- Add containerized runtime option for reproducible environments.
-- Document release checklist (dependency lock refresh, smoke test, changelog).
-
-### Exit criteria for next phase
-- CI is green on `main`.
-- Smoke test artifacts can be generated consistently from a clean environment.
-- README reflects production-ready setup, usage, and troubleshooting paths.
-
-## Troubleshooting
-- GitHub/Hugging Face rate limiting or model access issues:
-  - Authenticate with Hugging Face CLI and accept model license terms if required.
-- Very slow inference:
-  - Confirm GPU availability and avoid `--cpu`.
-- Resolution errors:
-  - Use width and height values that are multiples of 8.
+Run lint + tests:
+```bash
+ruff check .
+pytest
+```

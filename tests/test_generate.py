@@ -21,17 +21,37 @@ class DummyPipeline:
         self.calls: list[dict] = []
         self.device: str | None = None
         self.scheduler = types.SimpleNamespace(config={"kind": "default"}, name="default")
+        self.low_memory_features: list[str] = []
 
     def to(self, device: str) -> "DummyPipeline":
         self.device = device
         return self
+
+    def enable_attention_slicing(self) -> None:
+        self.low_memory_features.append("attention_slicing")
+
+    def enable_vae_slicing(self) -> None:
+        self.low_memory_features.append("vae_slicing")
 
     def __call__(self, **kwargs):
         self.calls.append(kwargs)
         return types.SimpleNamespace(images=self.images)
 
 
-def install_fake_runtime(monkeypatch: pytest.MonkeyPatch, pipeline: DummyPipeline) -> list[tuple]:
+class MinimalPipelineWithoutMemoryControls:
+    def __init__(self) -> None:
+        self.scheduler = types.SimpleNamespace(config={"kind": "default"}, name="default")
+        self.calls: list[dict] = []
+
+    def to(self, _device: str):
+        return self
+
+    def __call__(self, **kwargs):
+        self.calls.append(kwargs)
+        return types.SimpleNamespace(images=[DummyImage()])
+
+
+def install_fake_runtime(monkeypatch: pytest.MonkeyPatch, pipeline) -> list[tuple]:
     from_pretrained_calls: list[tuple] = []
 
     class FakeGenerator:
@@ -43,15 +63,24 @@ def install_fake_runtime(monkeypatch: pytest.MonkeyPatch, pipeline: DummyPipelin
             self.seed = seed
             return self
 
+    class FakeCuda:
+        @staticmethod
+        def is_available() -> bool:
+            return False
+
+        @staticmethod
+        def get_device_name(_index: int) -> str:
+            return "fake-gpu"
+
+        @staticmethod
+        def get_device_properties(_index: int):
+            return types.SimpleNamespace(total_memory=16 * (1024**3))
+
     class FakeTorch:
         float16 = "float16"
         float32 = "float32"
         Generator = FakeGenerator
-
-        class cuda:
-            @staticmethod
-            def is_available() -> bool:
-                return False
+        cuda = FakeCuda
 
     class FakeStableDiffusionPipeline:
         @staticmethod
@@ -110,6 +139,7 @@ def build_args(tmp_path: Path, **overrides):
         "seed": 1,
         "num_images": 1,
         "cpu": True,
+        "low_memory": False,
     }
     args.update(overrides)
     return argparse.Namespace(**args)
@@ -133,7 +163,9 @@ def test_generate_rejects_invalid_num_images(
         generate.main()
 
 
-def test_generate_smoke_single_image(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_generate_smoke_single_image(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
     output = tmp_path / "single.png"
     pipeline = DummyPipeline(images=[DummyImage()])
     from_pretrained_calls = install_fake_runtime(monkeypatch, pipeline)
@@ -150,19 +182,25 @@ def test_generate_smoke_single_image(monkeypatch: pytest.MonkeyPatch, tmp_path: 
             model_revision="v1.0.0",
             guidance_scale=6.0,
             seed=42,
+            low_memory=True,
         ),
     )
 
     generate.main()
+    output_text = capsys.readouterr().out
 
     assert output.exists()
     assert pipeline.device == "cpu"
     assert pipeline.scheduler.name == "euler"
+    assert pipeline.low_memory_features == ["attention_slicing", "vae_slicing"]
     assert from_pretrained_calls == [
         ("fake/model", {"torch_dtype": "float32", "revision": "v1.0.0"})
     ]
     assert pipeline.calls[0]["num_images_per_prompt"] == 1
     assert "extra fingers, blurry, low quality" in pipeline.calls[0]["negative_prompt"]
+    assert "Diagnostics: device=cpu" in output_text
+    assert "Generating images..." in output_text
+    assert "Runtime summary:" in output_text
 
 
 def test_generate_smoke_multiple_images(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -182,6 +220,22 @@ def test_generate_smoke_multiple_images(monkeypatch: pytest.MonkeyPatch, tmp_pat
     assert (tmp_path / "batch_02.png").exists()
     assert (tmp_path / "batch_03.png").exists()
     assert pipeline.scheduler.name == "ddim"
+
+
+def test_low_memory_without_available_features(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    pipeline = MinimalPipelineWithoutMemoryControls()
+    install_fake_runtime(monkeypatch, pipeline)
+    monkeypatch.setattr(
+        generate,
+        "parse_args",
+        lambda: build_args(tmp_path, low_memory=True),
+    )
+
+    generate.main()
+    output_text = capsys.readouterr().out
+    assert "no memory-saving features were available" in output_text
 
 
 def test_negative_prompt_preset_only() -> None:

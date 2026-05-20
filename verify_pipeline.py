@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
 
+from model_loader import create_generator, load_stable_diffusion_runtime
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -45,24 +47,17 @@ def main() -> None:
     if args.steps < 1:
         raise ValueError("--steps must be >= 1.")
 
-    import torch
-    from diffusers import StableDiffusionPipeline
-
-    use_cuda = torch.cuda.is_available() and not args.cpu
-    device = "cuda" if use_cuda else "cpu"
-    dtype = torch.float16 if use_cuda else torch.float32
-
-    print(f"Loading verification model '{args.model}' on {device}...")
-    pipe = StableDiffusionPipeline.from_pretrained(
-        args.model,
-        torch_dtype=dtype,
-        safety_checker=None,
-        requires_safety_checker=False,
+    runtime = load_stable_diffusion_runtime(
+        model=args.model,
+        force_cpu=args.cpu,
+        disable_safety_checker=True,
     )
-    pipe = pipe.to(device)
+    torch = runtime.torch
+    pipe = runtime.pipe
+    device = runtime.device
+    print(f"Loading verification model '{args.model}' on {device}...")
     pipe.set_progress_bar_config(disable=True)
-
-    generator = torch.Generator(device=device).manual_seed(args.seed)
+    generator = create_generator(torch, device=device, seed=args.seed)
     result = pipe(
         prompt=args.prompt,
         width=args.width,
