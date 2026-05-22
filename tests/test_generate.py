@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 import types
 from pathlib import Path
@@ -140,6 +141,12 @@ def build_args(tmp_path: Path, **overrides):
         "num_images": 1,
         "cpu": True,
         "low_memory": False,
+        "save_metadata": True,
+        "metadata_file": None,
+        "preset": None,
+        "presets_file": "config/presets.json",
+        "list_presets": False,
+        "from_metadata": None,
     }
     args.update(overrides)
     return argparse.Namespace(**args)
@@ -190,6 +197,12 @@ def test_generate_smoke_single_image(
     output_text = capsys.readouterr().out
 
     assert output.exists()
+    metadata_file = output.with_suffix(".json")
+    assert metadata_file.exists()
+    metadata = json.loads(metadata_file.read_text(encoding="utf-8"))
+    assert metadata["parameters"]["prompt"] == "test prompt"
+    assert metadata["parameters"]["scheduler"] == "euler"
+    assert metadata["outputs"] == [str(output.resolve())]
     assert pipeline.device == "cpu"
     assert pipeline.scheduler.name == "euler"
     assert pipeline.low_memory_features == ["attention_slicing", "vae_slicing"]
@@ -227,6 +240,7 @@ def test_generate_smoke_multiple_images(monkeypatch: pytest.MonkeyPatch, tmp_pat
     assert (tmp_path / "batch_01.png").exists()
     assert (tmp_path / "batch_02.png").exists()
     assert (tmp_path / "batch_03.png").exists()
+    assert (tmp_path / "batch_run.json").exists()
     assert pipeline.scheduler.name == "ddim"
 
 
@@ -254,3 +268,21 @@ def test_negative_prompt_preset_only() -> None:
 def test_negative_prompt_user_and_preset() -> None:
     prompt = generate.build_negative_prompt("extra fingers", "illustration")
     assert prompt.startswith("extra fingers, ")
+
+
+def test_generate_skips_metadata_when_disabled(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    output = tmp_path / "no_metadata.png"
+    pipeline = DummyPipeline(images=[DummyImage()])
+    install_fake_runtime(monkeypatch, pipeline)
+    monkeypatch.setattr(
+        generate,
+        "parse_args",
+        lambda: build_args(tmp_path, output=str(output), save_metadata=False),
+    )
+
+    generate.main()
+
+    assert output.exists()
+    assert not output.with_suffix(".json").exists()
