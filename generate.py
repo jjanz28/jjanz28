@@ -150,6 +150,7 @@ def main() -> None:
         model_revision=args.model_revision,
         force_cpu=args.cpu,
         scheduler_name=args.scheduler,
+        disable_safety_checker=True,
     )
     torch = runtime.torch
     pipe = runtime.pipe

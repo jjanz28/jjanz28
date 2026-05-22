@@ -194,7 +194,15 @@ def test_generate_smoke_single_image(
     assert pipeline.scheduler.name == "euler"
     assert pipeline.low_memory_features == ["attention_slicing", "vae_slicing"]
     assert from_pretrained_calls == [
-        ("fake/model", {"torch_dtype": "float32", "revision": "v1.0.0"})
+        (
+            "fake/model",
+            {
+                "torch_dtype": "float32",
+                "revision": "v1.0.0",
+                "safety_checker": None,
+                "requires_safety_checker": False,
+            },
+        )
     ]
     assert pipeline.calls[0]["num_images_per_prompt"] == 1
     assert "extra fingers, blurry, low quality" in pipeline.calls[0]["negative_prompt"]

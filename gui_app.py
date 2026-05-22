@@ -14,6 +14,17 @@ VENV_PYTHON = PROJECT_DIR / ".venv" / "bin" / "python"
 GENERATE_SCRIPT = PROJECT_DIR / "generate.py"
 OUTPUT_DIR = PROJECT_DIR / "outputs"
 DEFAULT_MODEL = "runwayml/stable-diffusion-v1-5"
+DEFAULT_STEPS = 40
+DEFAULT_GUIDANCE_SCALE = 9.0
+DEFAULT_SCHEDULER = "dpmpp_2m"
+DEFAULT_NEGATIVE_PROMPT = (
+    "blurry, low quality, dull colors, muted colors, low contrast, washed out, "
+    "bad anatomy, deformed, watermark, text, logo"
+)
+DEFAULT_PROMPT_TEMPLATE = (
+    "epic fantasy landscape, magical atmosphere, intricate details, "
+    "vibrant colors, dramatic lighting, volumetric light, cinematic composition"
+)
 
 
 class StableDiffusionLauncher:
@@ -21,13 +32,13 @@ class StableDiffusionLauncher:
         self.root = root
         self.root.title("Stable Diffusion Launcher")
         self.root.geometry("760x520")
-
-        self.negative_prompt_var = tk.StringVar()
+        self.negative_prompt_var = tk.StringVar(value=DEFAULT_NEGATIVE_PROMPT)
         self.model_var = tk.StringVar(value=DEFAULT_MODEL)
         self.output_var = tk.StringVar(value=str(OUTPUT_DIR / "gui_output.png"))
-        self.steps_var = tk.IntVar(value=25)
-        self.scheduler_var = tk.StringVar(value="default")
-        self.low_memory_var = tk.BooleanVar(value=True)
+        self.steps_var = tk.IntVar(value=DEFAULT_STEPS)
+        self.scheduler_var = tk.StringVar(value=DEFAULT_SCHEDULER)
+        self.guidance_scale_var = tk.DoubleVar(value=DEFAULT_GUIDANCE_SCALE)
+        self.low_memory_var = tk.BooleanVar(value=False)
         self.seed_var = tk.StringVar()
         self.prompt_text: tk.Text
 
@@ -44,6 +55,7 @@ class StableDiffusionLauncher:
         ttk.Label(frame, text="Prompt").grid(row=0, column=0, sticky="w")
         self.prompt_text = tk.Text(frame, height=5, wrap="word")
         self.prompt_text.grid(row=1, column=0, columnspan=4, sticky="ew", pady=(4, 10))
+        self.prompt_text.insert("1.0", DEFAULT_PROMPT_TEMPLATE)
 
         ttk.Label(frame, text="Negative Prompt").grid(row=2, column=0, sticky="w")
         ttk.Entry(frame, textvariable=self.negative_prompt_var).grid(
@@ -71,22 +83,38 @@ class StableDiffusionLauncher:
         ttk.Combobox(
             frame,
             textvariable=self.scheduler_var,
-            values=("default", "euler", "euler_a", "ddim", "dpm"),
+            values=("default", "euler", "euler_a", "ddim", "dpmpp_2m"),
             state="readonly",
             width=12,
         ).grid(row=9, column=1, sticky="w", pady=(4, 10))
+        ttk.Label(frame, text="Guidance").grid(row=8, column=2, sticky="w")
+        ttk.Spinbox(
+            frame,
+            from_=1.0,
+            to=20.0,
+            increment=0.5,
+            textvariable=self.guidance_scale_var,
+            width=8,
+        ).grid(row=9, column=2, sticky="w", pady=(4, 10))
 
-        ttk.Label(frame, text="Seed (optional)").grid(row=8, column=2, sticky="w")
+        ttk.Label(frame, text="Seed (optional)").grid(row=8, column=3, sticky="w")
         ttk.Entry(frame, textvariable=self.seed_var, width=14).grid(
-            row=9, column=2, sticky="w", pady=(4, 10)
-        )
-
-        ttk.Checkbutton(frame, text="Low memory mode", variable=self.low_memory_var).grid(
             row=9, column=3, sticky="w", pady=(4, 10)
         )
 
+        ttk.Checkbutton(frame, text="Low memory mode", variable=self.low_memory_var).grid(
+            row=10, column=0, sticky="w", pady=(4, 10)
+        )
+        ttk.Button(
+            frame,
+            text="Apply vivid fantasy defaults",
+            command=self._apply_vivid_fantasy_defaults,
+        ).grid(
+            row=10, column=1, columnspan=2, sticky="w", pady=(4, 10)
+        )
+
         buttons = ttk.Frame(frame)
-        buttons.grid(row=10, column=0, columnspan=4, sticky="ew", pady=(2, 10))
+        buttons.grid(row=11, column=0, columnspan=4, sticky="ew", pady=(2, 10))
         self.generate_button = ttk.Button(buttons, text="Generate", command=self._generate)
         self.generate_button.pack(side="left")
         ttk.Button(buttons, text="Open Outputs Folder", command=self._open_outputs).pack(
@@ -94,17 +122,26 @@ class StableDiffusionLauncher:
         )
 
         ttk.Label(frame, textvariable=self.status_var).grid(
-            row=11, column=0, columnspan=4, sticky="w"
+            row=12, column=0, columnspan=4, sticky="w"
         )
-        ttk.Label(frame, text="Logs").grid(row=12, column=0, sticky="w", pady=(10, 4))
+        ttk.Label(frame, text="Logs").grid(row=13, column=0, sticky="w", pady=(10, 4))
         self.log_widget = tk.Text(frame, height=10, wrap="word", state="disabled")
-        self.log_widget.grid(row=13, column=0, columnspan=4, sticky="nsew")
+        self.log_widget.grid(row=14, column=0, columnspan=4, sticky="nsew")
 
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=1)
         frame.columnconfigure(2, weight=1)
         frame.columnconfigure(3, weight=0)
-        frame.rowconfigure(13, weight=1)
+        frame.rowconfigure(14, weight=1)
+
+    def _apply_vivid_fantasy_defaults(self) -> None:
+        self.model_var.set(DEFAULT_MODEL)
+        self.negative_prompt_var.set(DEFAULT_NEGATIVE_PROMPT)
+        self.steps_var.set(DEFAULT_STEPS)
+        self.scheduler_var.set(DEFAULT_SCHEDULER)
+        self.guidance_scale_var.set(DEFAULT_GUIDANCE_SCALE)
+        self.low_memory_var.set(False)
+        self.status_var.set("Applied vivid fantasy defaults.")
 
     def _choose_output(self) -> None:
         selected = filedialog.asksaveasfilename(
@@ -136,6 +173,9 @@ class StableDiffusionLauncher:
         if output_path.suffix.lower() != ".png":
             raise ValueError("Output file must end with .png")
         output_path.parent.mkdir(parents=True, exist_ok=True)
+        guidance_scale = self.guidance_scale_var.get()
+        if guidance_scale <= 0:
+            raise ValueError("Guidance must be > 0.")
 
         command = [
             str(VENV_PYTHON),
@@ -148,6 +188,8 @@ class StableDiffusionLauncher:
             str(output_path),
             "--steps",
             str(self.steps_var.get()),
+            "--guidance-scale",
+            str(guidance_scale),
             "--scheduler",
             self.scheduler_var.get(),
         ]
