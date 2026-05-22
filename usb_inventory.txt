@@ -1,0 +1,7 @@
+Linux Foundation — 2.0 root hub (1d6b:0002)
+Linux Foundation — 3.0 root hub (1d6b:0003)
+Realtek — Bluetooth Radio (0bda:b85b)
+Realtek — BillBoard Device (0bda:2171)
+USB — Disk 2.0 (346d:5678)
+SHARKOON Technologies GmbH — Mediatrack Edge Mini Keyboard (1ea7:0066)
+CSCTEK (vendor ID maps to Zoran/Nogatech namespace) — USB Audio and HID (0573:1573)
