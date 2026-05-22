@@ -1,6 +1,9 @@
 # Stable Diffusion CLI Project
 Local text-to-image generation project built with Python, PyTorch, and Hugging Face Diffusers.
 
+## Docs Index
+- `docs/monitoring.md` — AMD CPU monitoring setup, persistence, and reboot verification
+
 ## Project structure
 ```text
 stable-diffusion/
@@ -228,3 +231,8 @@ unalias ll
 - Avoid aliasing critical commands to risky behavior (for example `rm` with destructive flags).
 - After changes, always test with `alias <name>` before relying on the alias.
 - If an alias interferes with a command, run the real command with a leading backslash, e.g. `\ls`.
+
+# AMD CPU Monitoring
+Monitoring setup and persistence details were moved to:
+
+- `docs/monitoring.md`
