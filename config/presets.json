@@ -1,0 +1,26 @@
+{
+  "anime-clean": {
+    "guidance_scale": 8.0,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "low quality, blurry, bad hands, malformed face, watermark, text",
+    "scheduler": "ddim",
+    "steps": 32
+  },
+  "fantasy-vivid": {
+    "guidance_scale": 9.0,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, dull colors, muted colors, low contrast, washed out, bad anatomy, deformed, watermark, text, logo",
+    "scheduler": "dpmpp_2m",
+    "steps": 40
+  },
+  "portrait-photo": {
+    "guidance_scale": 7.5,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, artifacts, overexposed, underexposed, watermark, text",
+    "scheduler": "euler_a",
+    "steps": 30
+  }
+}
