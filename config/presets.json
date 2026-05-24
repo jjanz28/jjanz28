@@ -24,11 +24,11 @@
     "steps": 30
   },
   "realistic": {
-    "guidance_scale": 7.0,
+    "guidance_scale": 6.5,
     "low_memory": false,
     "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, low detail, overprocessed, oversaturated, cartoon, anime, illustration, cgi, 3d render, plastic skin, watermark, text",
-    "scheduler": "euler_a",
-    "steps": 35
+    "negative_prompt": "blurry, low quality, low detail, overprocessed, oversaturated, cartoon, anime, illustration, cgi, 3d render, plastic skin, waxy skin, uncanny face, extra fingers, malformed hands, watermark, text, logo",
+    "scheduler": "dpmpp_2m",
+    "steps": 38
   }
 }
