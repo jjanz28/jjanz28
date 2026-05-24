@@ -19,7 +19,7 @@ DEFAULT_MODEL = "runwayml/stable-diffusion-v1-5"
 DEFAULT_STEPS = 40
 DEFAULT_GUIDANCE_SCALE = 9.0
 DEFAULT_SCHEDULER = "dpmpp_2m"
-DEFAULT_PRESET_NAME = "fantasy-vivid"
+DEFAULT_PRESET_NAME = "realistic"
 DEFAULT_NEGATIVE_PROMPT = (
     "blurry, low quality, dull colors, muted colors, low contrast, washed out, "
     "bad anatomy, deformed, watermark, text, logo"

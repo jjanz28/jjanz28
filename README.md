@@ -113,6 +113,7 @@ python generate.py \
   - `fantasy-vivid`
   - `portrait-photo`
   - `anime-clean`
+  - `realistic`
 - CLI behavior:
   - Preset values become defaults.
   - Explicit CLI flags override preset values for the same fields.

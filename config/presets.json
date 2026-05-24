@@ -22,5 +22,13 @@
     "negative_prompt": "blurry, low quality, artifacts, overexposed, underexposed, watermark, text",
     "scheduler": "euler_a",
     "steps": 30
+  },
+  "realistic": {
+    "guidance_scale": 7.0,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, low detail, overprocessed, oversaturated, cartoon, anime, illustration, cgi, 3d render, plastic skin, watermark, text",
+    "scheduler": "euler_a",
+    "steps": 35
   }
 }
