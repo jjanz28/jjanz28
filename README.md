@@ -110,6 +110,18 @@ python generate.py \
   - `fantasy-vivid`
   - `portrait-photo`
   - `anime-clean`
+  - `cinematic-realism`
+  - `concept-art-balanced`
+  - `low-vram-draft`
+  - `photo-soft-light`
+- Preset quick guide:
+  - `fantasy-vivid`: vivid fantasy scenes with strong contrast and color.
+  - `portrait-photo`: balanced portrait-style photo look.
+  - `anime-clean`: cleaner anime lines with reduced artifacts.
+  - `cinematic-realism`: realistic renders with cinematic tone.
+  - `concept-art-balanced`: stylized concept-art output with balanced detail.
+  - `low-vram-draft`: faster low-memory draft generations for constrained GPUs.
+  - `photo-soft-light`: softer photo lighting and gentler contrast.
 - CLI behavior:
   - Preset values become defaults.
   - Explicit CLI flags override preset values for the same fields.
