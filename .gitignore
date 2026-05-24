@@ -86,3 +86,24 @@ snap/
 # Misc logs/artifacts
 ############################
 *.log
+
+############################
+# Additional local machine/project paths
+############################
+.android/
+.bash_aliases
+.bash_logout
+.bashrc
+.clamtk/
+.gitconfig
+.profile
+.sudo_as_admin_successful
+.wine32/
+.wine64-xperia/
+1{print
+artifacts/
+esmi_ib_library/
+jjanz28/
+lynis-report.dat
+stable-diffusion-webui/
+stable-diffusion/
