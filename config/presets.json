@@ -7,6 +7,22 @@
     "scheduler": "ddim",
     "steps": 32
   },
+  "cinematic-realism": {
+    "guidance_scale": 7.0,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, overprocessed skin, extra limbs, deformed eyes, watermark, text",
+    "scheduler": "euler",
+    "steps": 34
+  },
+  "concept-art-balanced": {
+    "guidance_scale": 8.5,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, muddy textures, flat lighting, distorted proportions, watermark, text",
+    "scheduler": "dpmpp_2m",
+    "steps": 36
+  },
   "fantasy-vivid": {
     "guidance_scale": 9.0,
     "low_memory": false,
@@ -14,6 +30,22 @@
     "negative_prompt": "blurry, low quality, dull colors, muted colors, low contrast, washed out, bad anatomy, deformed, watermark, text, logo",
     "scheduler": "dpmpp_2m",
     "steps": 40
+  },
+  "low-vram-draft": {
+    "guidance_scale": 6.5,
+    "low_memory": true,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, artifacts, bad anatomy, watermark, text",
+    "scheduler": "ddim",
+    "steps": 20
+  },
+  "photo-soft-light": {
+    "guidance_scale": 6.0,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, oversharpened, overexposed, underexposed, artifacts, watermark, text",
+    "scheduler": "euler_a",
+    "steps": 28
   },
   "portrait-photo": {
     "guidance_scale": 7.5,
