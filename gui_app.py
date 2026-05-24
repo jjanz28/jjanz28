@@ -25,8 +25,8 @@ DEFAULT_NEGATIVE_PROMPT = (
     "bad anatomy, deformed, watermark, text, logo"
 )
 DEFAULT_PROMPT_TEMPLATE = (
-    "epic fantasy landscape, magical atmosphere, intricate details, "
-    "vibrant colors, dramatic lighting, volumetric light, cinematic composition"
+    "portrait photo of a person in natural window light, realistic skin texture, "
+    "shallow depth of field, 85mm lens, high detail, cinematic composition"
 )
 
 
