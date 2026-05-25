@@ -7,38 +7,6 @@
     "scheduler": "ddim",
     "steps": 32
   },
-  "cinematic-film": {
-    "guidance_scale": 7.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, flat lighting, bad anatomy, noise, watermark, text, logo",
-    "scheduler": "dpmpp_2m",
-    "steps": 36
-  },
-  "concept-art": {
-    "guidance_scale": 9.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, muddy colors, bad composition, watermark, text",
-    "scheduler": "euler",
-    "steps": 42
-  },
-  "digital-illustration": {
-    "guidance_scale": 8.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, bad anatomy, extra limbs, artifacts, watermark, text",
-    "scheduler": "ddim",
-    "steps": 34
-  },
-  "dreamscape": {
-    "guidance_scale": 10.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, noisy, cluttered, banding, watermark, text",
-    "scheduler": "euler_a",
-    "steps": 40
-  },
   "fantasy-vivid": {
     "guidance_scale": 9.0,
     "low_memory": false,
@@ -46,62 +14,6 @@
     "negative_prompt": "blurry, low quality, dull colors, muted colors, low contrast, washed out, bad anatomy, deformed, watermark, text, logo",
     "scheduler": "dpmpp_2m",
     "steps": 40
-  },
-  "food-photo": {
-    "guidance_scale": 6.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, oversaturated, bad texture, messy plating, watermark, text",
-    "scheduler": "dpmpp_2m",
-    "steps": 34
-  },
-  "interior-design": {
-    "guidance_scale": 7.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, warped lines, distorted perspective, clutter, watermark, text",
-    "scheduler": "euler",
-    "steps": 36
-  },
-  "landscape-photo": {
-    "guidance_scale": 7.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, haze, artifacts, overprocessed, watermark, text, logo",
-    "scheduler": "dpmpp_2m",
-    "steps": 38
-  },
-  "macro-photo": {
-    "guidance_scale": 6.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, soft focus, chromatic aberration, noise, watermark, text",
-    "scheduler": "euler_a",
-    "steps": 34
-  },
-  "noir-street": {
-    "guidance_scale": 8.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, flat contrast, washed out blacks, bad anatomy, watermark, text",
-    "scheduler": "euler_a",
-    "steps": 36
-  },
-  "oil-painting": {
-    "guidance_scale": 9.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, muddy brushwork, poor composition, artifacts, watermark, text",
-    "scheduler": "ddim",
-    "steps": 38
-  },
-  "pixel-art": {
-    "guidance_scale": 10.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, antialiasing, smooth gradients, realistic shading, watermark, text",
-    "scheduler": "euler",
-    "steps": 30
   },
   "portrait-photo": {
     "guidance_scale": 7.5,
@@ -111,14 +23,6 @@
     "scheduler": "euler_a",
     "steps": 30
   },
-  "product-photo": {
-    "guidance_scale": 6.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, messy background, reflections artifacts, warped perspective, watermark, text",
-    "scheduler": "dpmpp_2m",
-    "steps": 34
-  },
   "realistic": {
     "guidance_scale": 6.5,
     "low_memory": false,
@@ -126,45 +30,5 @@
     "negative_prompt": "blurry, low quality, low detail, overprocessed, oversaturated, cartoon, anime, illustration, cgi, 3d render, plastic skin, waxy skin, uncanny face, extra fingers, malformed hands, watermark, text, logo",
     "scheduler": "dpmpp_2m",
     "steps": 38
-  },
-  "sci-fi-concept": {
-    "guidance_scale": 9.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, muddy design, incoherent geometry, artifacts, watermark, text",
-    "scheduler": "euler",
-    "steps": 40
-  },
-  "sketch-ink": {
-    "guidance_scale": 8.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, smudged lines, muddy shading, artifacts, watermark, text",
-    "scheduler": "ddim",
-    "steps": 32
-  },
-  "steampunk": {
-    "guidance_scale": 9.0,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, bad anatomy, clutter, malformed machinery, watermark, text",
-    "scheduler": "euler_a",
-    "steps": 39
-  },
-  "watercolor-soft": {
-    "guidance_scale": 8.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, muddy washes, overblended paint, artifacts, watermark, text",
-    "scheduler": "ddim",
-    "steps": 34
-  },
-  "wildlife-photo": {
-    "guidance_scale": 6.5,
-    "low_memory": false,
-    "model": "runwayml/stable-diffusion-v1-5",
-    "negative_prompt": "blurry, low quality, motion blur, out of frame, bad anatomy, watermark, text",
-    "scheduler": "dpmpp_2m",
-    "steps": 36
   }
 }
