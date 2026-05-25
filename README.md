@@ -110,10 +110,27 @@ python generate.py \
 ## Preset system
 - Preset definitions live in `config/presets.json`.
 - Built-in presets:
-  - `fantasy-vivid`
-  - `portrait-photo`
   - `anime-clean`
+  - `cinematic-film`
+  - `concept-art`
+  - `digital-illustration`
+  - `dreamscape`
+  - `fantasy-vivid`
+  - `food-photo`
+  - `interior-design`
+  - `landscape-photo`
+  - `macro-photo`
+  - `noir-street`
+  - `oil-painting`
+  - `pixel-art`
+  - `portrait-photo`
+  - `product-photo`
   - `realistic`
+  - `sci-fi-concept`
+  - `sketch-ink`
+  - `steampunk`
+  - `watercolor-soft`
+  - `wildlife-photo`
 - CLI behavior:
   - Preset values become defaults.
   - Explicit CLI flags override preset values for the same fields.
