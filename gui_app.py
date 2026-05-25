@@ -16,17 +16,20 @@ VENV_PYTHON = PROJECT_DIR / ".venv" / "bin" / "python"
 GENERATE_SCRIPT = PROJECT_DIR / "generate.py"
 OUTPUT_DIR = PROJECT_DIR / "outputs"
 DEFAULT_MODEL = "runwayml/stable-diffusion-v1-5"
-DEFAULT_STEPS = 40
-DEFAULT_GUIDANCE_SCALE = 9.0
+DEFAULT_STEPS = 44
+DEFAULT_GUIDANCE_SCALE = 6.0
 DEFAULT_SCHEDULER = "dpmpp_2m"
-DEFAULT_PRESET_NAME = "realistic"
+DEFAULT_PRESET_NAME = "premium-realistic"
 DEFAULT_NEGATIVE_PROMPT = (
-    "blurry, low quality, dull colors, muted colors, low contrast, washed out, "
-    "bad anatomy, deformed, watermark, text, logo"
+    "blurry, low quality, low detail, jpeg artifacts, overprocessed, oversaturated, "
+    "underexposed, overexposed, cartoon, anime, illustration, cgi, 3d render, "
+    "plastic skin, waxy skin, uncanny face, asymmetrical eyes, extra fingers, "
+    "malformed hands, bad anatomy, watermark, text, logo"
 )
 DEFAULT_PROMPT_TEMPLATE = (
-    "portrait photo of a person in natural window light, realistic skin texture, "
-    "shallow depth of field, 85mm lens, high detail, cinematic composition"
+    "ultra realistic portrait photo of a person, natural window light, realistic skin "
+    "texture, shallow depth of field, 85mm lens, subtle filmic color grading, "
+    "high detail, premium editorial photography"
 )
 
 

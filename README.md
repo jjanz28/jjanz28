@@ -124,6 +124,7 @@ python generate.py \
   - `oil-painting`
   - `pixel-art`
   - `portrait-photo`
+  - `premium-realistic`
   - `product-photo`
   - `realistic`
   - `sci-fi-concept`

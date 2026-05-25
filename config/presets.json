@@ -111,6 +111,14 @@
     "scheduler": "euler_a",
     "steps": 30
   },
+  "premium-realistic": {
+    "guidance_scale": 6.0,
+    "low_memory": false,
+    "model": "runwayml/stable-diffusion-v1-5",
+    "negative_prompt": "blurry, low quality, low detail, jpeg artifacts, overprocessed, oversaturated, underexposed, overexposed, cartoon, anime, illustration, cgi, 3d render, plastic skin, waxy skin, uncanny face, asymmetrical eyes, extra fingers, malformed hands, bad anatomy, watermark, text, logo",
+    "scheduler": "dpmpp_2m",
+    "steps": 44
+  },
   "product-photo": {
     "guidance_scale": 6.0,
     "low_memory": false,
