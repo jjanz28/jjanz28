@@ -110,15 +110,34 @@ python generate.py \
 ## Preset system
 - Preset definitions live in `config/presets.json`.
 - Built-in presets:
-  - `fantasy-vivid`
-  - `portrait-photo`
   - `anime-clean`
+  - `cinematic-film`
+  - `concept-art`
+  - `digital-illustration`
+  - `dreamscape`
+  - `fantasy-vivid`
+  - `food-photo`
+  - `interior-design`
+  - `landscape-photo`
+  - `macro-photo`
+  - `noir-street`
+  - `oil-painting`
+  - `pixel-art`
+  - `portrait-photo`
+  - `premium-realistic`
+  - `product-photo`
   - `realistic`
+  - `sci-fi-concept`
+  - `sketch-ink`
+  - `steampunk`
+  - `watercolor-soft`
+  - `wildlife-photo`
 - CLI behavior:
   - Preset values become defaults.
   - Explicit CLI flags override preset values for the same fields.
 - GUI behavior:
   - Choose a preset from the **Preset** dropdown.
+  - Choose a model from the **Model** dropdown (or type a custom Hugging Face model ID).
   - Click **Apply** to load preset values.
   - Click **Save** to store your current settings as a new preset.
 
