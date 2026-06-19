@@ -16,6 +16,16 @@ VENV_PYTHON = PROJECT_DIR / ".venv" / "bin" / "python"
 GENERATE_SCRIPT = PROJECT_DIR / "generate.py"
 OUTPUT_DIR = PROJECT_DIR / "outputs"
 DEFAULT_MODEL = "runwayml/stable-diffusion-v1-5"
+MODEL_OPTIONS: tuple[tuple[str, str], ...] = (
+    ("Stable Diffusion 1.5 (balanced)", "runwayml/stable-diffusion-v1-5"),
+    ("Stable Diffusion 2.1 (high-res)", "stabilityai/stable-diffusion-2-1"),
+    ("Stable Diffusion 2.1 Base (fast)", "stabilityai/stable-diffusion-2-1-base"),
+    ("OpenJourney v4 (artistic)", "prompthero/openjourney-v4"),
+    ("DreamShaper 8 (general-purpose)", "Lykon/dreamshaper-8"),
+)
+DEFAULT_MODEL_LABEL = MODEL_OPTIONS[0][0]
+MODEL_LABEL_TO_ID = {label: model_id for label, model_id in MODEL_OPTIONS}
+MODEL_DROPDOWN_VALUES = tuple(label for label, _ in MODEL_OPTIONS)
 DEFAULT_STEPS = 44
 DEFAULT_GUIDANCE_SCALE = 6.0
 DEFAULT_SCHEDULER = "dpmpp_2m"
@@ -33,6 +43,13 @@ DEFAULT_PROMPT_TEMPLATE = (
 )
 
 
+def resolve_model_choice(value: str) -> str:
+    selected = value.strip()
+    if not selected:
+        return DEFAULT_MODEL
+    return MODEL_LABEL_TO_ID.get(selected, selected)
+
+
 class StableDiffusionLauncher:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
@@ -40,7 +57,7 @@ class StableDiffusionLauncher:
         self.root.geometry("760x520")
 
         self.negative_prompt_var = tk.StringVar(value=DEFAULT_NEGATIVE_PROMPT)
-        self.model_var = tk.StringVar(value=DEFAULT_MODEL)
+        self.model_var = tk.StringVar(value=DEFAULT_MODEL_LABEL)
         self.output_var = tk.StringVar(value=str(OUTPUT_DIR / "gui_output.png"))
         self.steps_var = tk.IntVar(value=DEFAULT_STEPS)
         self.scheduler_var = tk.StringVar(value=DEFAULT_SCHEDULER)
@@ -77,7 +94,12 @@ class StableDiffusionLauncher:
         )
 
         ttk.Label(frame, text="Model").grid(row=4, column=0, sticky="w")
-        ttk.Entry(frame, textvariable=self.model_var).grid(
+        ttk.Combobox(
+            frame,
+            textvariable=self.model_var,
+            values=MODEL_DROPDOWN_VALUES,
+            state="normal",
+        ).grid(
             row=5, column=0, columnspan=4, sticky="ew", pady=(4, 10)
         )
 
@@ -208,7 +230,7 @@ class StableDiffusionLauncher:
     def _collect_current_preset_values(self) -> dict:
         negative_prompt = self.negative_prompt_var.get().strip()
         values = {
-            "model": self.model_var.get().strip() or DEFAULT_MODEL,
+            "model": resolve_model_choice(self.model_var.get()),
             "scheduler": self.scheduler_var.get(),
             "steps": self.steps_var.get(),
             "guidance_scale": float(self.guidance_scale_var.get()),
@@ -292,7 +314,7 @@ class StableDiffusionLauncher:
         command.extend(
             [
                 "--model",
-                self.model_var.get().strip() or DEFAULT_MODEL,
+                resolve_model_choice(self.model_var.get()),
                 "--output",
                 str(output_path),
                 "--steps",

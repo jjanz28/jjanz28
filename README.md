@@ -137,6 +137,7 @@ python generate.py \
   - Explicit CLI flags override preset values for the same fields.
 - GUI behavior:
   - Choose a preset from the **Preset** dropdown.
+  - Choose a model from the **Model** dropdown (or type a custom Hugging Face model ID).
   - Click **Apply** to load preset values.
   - Click **Save** to store your current settings as a new preset.
 
